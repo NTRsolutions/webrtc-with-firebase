@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WEBRTC APPS</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script type='text/javascript' src='https://cdn.scaledrone.com/scaledrone.min.js'></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twbs-pagination/1.3.1/jquery.twbsPagination.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.5/validator.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <link href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/5.1.0/firebase.js"></script>
+
+    <script type="text/javascript">
+      var url = "../php/";
+    </script>
+
+    <script src="js/app.js"></script>
+    <script src="js/item-ajax.js"></script>
+
+    <script type="text/javascript">
+        dashboard();
+    </script>
+
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 margin-tb">
+                <div class="pull-left">
+                      <div class="pull-left" style="margin-right:18px;">
+                          <img id="friendImage" src="https://firebasestorage.googleapis.com/v0/b/testfirebase-71c46.appspot.com/o/user_default.png?alt=media&token=917f7b07-58e4-481d-bb58-180e6762b69d" width="80px;" height="80px;" style="margin-top:20px;"/>
+                      </div>
+                      <div class="pull-right">
+                          <h2 id="usernameDB">usernameDashboard</h2>
+                          <button type="button" class="btn btn-danger" onclick="logoout()">
+                                Logout
+                          </button>
+                      </div>
+                </div>
+                <div class="pull-right">
+                    <button type="button" style="margin-top:40px;" class="btn btn-success" data-toggle="modal" data-target="#create-room-item">
+                          Create Room
+                    </button>
+                    <button type="button" style="margin-top:40px;" class="btn btn-success" data-toggle="modal" data-target="#search-item">
+                          Search Room
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="height:100%;margin-top:24px;">
+            <div id="room1" class="col-sm-12" style="height:720px; background:red;">
+
+                <!-- doing camera -->
+                <!-- <video id="yourVideo" autoplay muted playsinline></video>
+                <video id="friendsVideo" autoplay playsinline></video>
+                <br />
+                <button id="btnCall" onclick="showFriendsFace()" type="button" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-facetime-video" aria-hidden="true"></span> Call</button> -->
+            </div>
+            <div id="room2" class="room modal fade container-fluid" style="height:100%; background:grey;padding:0px;">
+              <div class="row text-center">
+                <h2>Room name : </h1>
+                <h3>Member : </h1>
+              </div>
+              <div class="row content">
+                <div class="col-sm-6">
+                    <video autoplay muted id="localVideo" style="background:#4c4c4c;height480px;width:640px;"></video>
+                </div>
+                <div class="col-sm-6">
+                    <video autoplay id="remoteVideo" style="background:#4c4c4c;height480px;width:640px;"></video>
+                </div>
+              </div>
+              <div class="row content">
+                <button id="btnCall" onclick="rejectCall()" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-facetime-video" aria-hidden="true"></span> Reject Call</button>
+              </div>
+            </div>
+            <div id="room3" class="room modal fade col-sm-12" style="height:780px; background:blue;padding:0px;">
+                <video class="col-sm-6" style="background:red;height:780px;height:100%;"></video>
+                <div class="col-sm-6" style="background:pink;height:780px;padding:0px;height:100%;">
+                    <video class="col-sm-12" style="background:yellow;height:390px;"></video>
+                    <video class="col-sm-12" style="background:green;height:390px;"></video>
+                </div>
+            </div>
+            <div id="room4" class="room modal fade col-sm-12" style="height:780px; background:blue;padding:0px;">
+                <video class="col-sm-6" style="background:red;height:780px;height:100%;"></video>
+                <div class="col-sm-6" style="background:pink;height:780px;padding:0px;height:100%;">
+                    <video class="col-sm-12" style="background:yellow;height:260px;"></video>
+                    <video class="col-sm-12" style="background:green;height:260px;"></video>
+                    <video class="col-sm-12" style="background:black;height:260px;"></video>
+                </div>
+            </div>
+        </div>
+
+            <!-- Create Item Modal -->
+        <div class="modal fade" id="search-item" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="myModalLabel">Search Room</h4>
+              </div>
+
+              <div class="modal-body">
+                    <form data-toggle="validator" method="POST">
+
+                        <div class="form-group">
+                            <label class="control-label" for="title">Email</label>
+                            <input type="text" name="title" class="form-control" data-error="Please enter title." required />
+                            <div class="help-block with-errors"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success" onclick="search()">Search</button>
+                        </div>
+
+                    </form>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal fade" id="create-room-item" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="myModalLabel">Create Room</h4>
+              </div>
+
+              <div class="modal-body">
+                    <form data-toggle="validator" method="POST">
+
+                        <div class="form-group">
+                            <label class="control-label" for="title">Room Name</label>
+                            <input type="text" id="roomName" name="roomName" class="form-control" data-error="Please enter title." required />
+                            <div class="help-block with-errors"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label" for="title">Room Capacity (Min: 2, Max : 4)</label>
+                            <input type="number" id="roomCapacity" name="roomCapacity" class="form-control" data-error="Please enter title." required />
+                            <div class="help-block with-errors"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" class="btn btn-success" onclick="createRoom()">Create</button>
+                        </div>
+
+                    </form>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal fade" id="friend-item" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="friendNameLabel">friendNameLabel</h4>
+              </div>
+
+              <div class="modal-body">
+                    <div style="width:100%; height:100%">
+                      <img id="friendImage" src="https://firebasestorage.googleapis.com/v0/b/testfirebase-71c46.appspot.com/o/user_default.png?alt=media&token=917f7b07-58e4-481d-bb58-180e6762b69d" width="100px;" height="100px;" style="margin-left: auto; margin-right: auto; display: block;"/>
+                      <h4 id="friendName" style="margin-left: auto; margin-right: auto; display: block; text-align:center;">friendName</h4>
+                      <button type="submit" class="btn crud-submit btn-success" style="margin-left: auto; margin-right: auto; display: block;" onclick="addFriend()">Add Friend</button>
+                    </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Edit Item Modal -->
+        <div class="modal fade" id="edit-item" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="myModalLabel">Edit Item</h4>
+              </div>
+
+              <div class="modal-body">
+                    <form data-toggle="validator" action="../php/update.php" method="put">
+                        <input type="hidden" name="id" class="edit-id">
+
+                        <div class="form-group">
+                            <label class="control-label" for="title">Title:</label>
+                            <input type="text" name="title" class="form-control" data-error="Please enter title." required />
+                            <div class="help-block with-errors"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label" for="title">Description:</label>
+                            <textarea name="description" class="form-control" data-error="Please enter description." required></textarea>
+                            <div class="help-block with-errors"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success crud-submit-edit">Submit</button>
+                        </div>
+
+                    </form>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+    </div>
+</body>
+</html>
