@@ -1,15 +1,15 @@
 // Initialize Firebase
 var config = {
-    apiKey: "AIzaSyCUsI1E3iL-ESre_MzMPNumKrh7H7m-4Ls",
-    authDomain: "testfirebase-71c46.firebaseapp.com",
-    databaseURL: "https://testfirebase-71c46.firebaseio.com",
-    projectId: "testfirebase-71c46",
-    storageBucket: "",
-    messagingSenderId: "822599842994"
+    apiKey: "AIzaSyAIKVjuaufdDqA9mECYn_VqHzApOdCmagc",
+    authDomain: "webrtc-19097.firebaseapp.com",
+    databaseURL: "https://webrtc-19097.firebaseio.com",
+    projectId: "webrtc-19097",
+    storageBucket: "webrtc-19097.appspot.com",
+    messagingSenderId: "122476759721"
 };
 
 var room;
-var pc;
+var pc, pc2 = '', pc3 = '';
 var configuration;
 var drone;
 var roomId;
@@ -62,7 +62,14 @@ function dashboard(){
 function rejectCall(){
     location.hash = '';
     pc.close();
-
+    if (pc2 != '') {
+        pc2.close();
+    }
+    if (pc3 != '') {
+        pc3.close();
+    }
+    room.unsubscribe();
+    deleteRoomName();
     $("#room2").modal("hide");
     $("#room3").modal("hide");
     $("#room4").modal("hide");
@@ -72,19 +79,14 @@ function createRoom(){
     var roomName = document.getElementById("roomName").value;
     var roomCapacity = document.getElementById("roomCapacity").value;
 
-    if (roomCapacity > 1 && roomCapacity < 5 && roomName != '') {
+    if (roomCapacity > 1 && roomCapacity < 3 && roomName != '') {
 
         $("#create-room-item").find("input[name='roomName']").val('');
         $("#create-room-item").find("input[name='roomCapacity']").val('');
         $(".modal").modal("hide");
 
         if (roomCapacity == 2) {
-            setDisplay("#room2", roomCapacity, roomName);
-            console.log("room2 created");
-        }else if (roomCapacity == 3) {
-            console.log("room 3 created");
-        }else {
-            console.log("room 4 created");
+            checkRoom("#room2", roomCapacity, roomName);
         }
 
     }else {
@@ -92,8 +94,143 @@ function createRoom(){
     }
 }
 
+function searchRoom(){
+    var roomName = document.getElementById("roomNameSearch").value;
+    if (roomName != '') {
+        $(".modal").modal("hide");
+        console.log(roomName);
+        searchRoomName(roomName);
+    }else {
+        alert('Please check room name.')
+    }
+}
+
+function deleteRoomName(){
+    var roomName = localStorage.getItem("roomName");
+    var userRoomID = localStorage.getItem("userRoomID");
+    console.log(roomName);
+    console.log(userRoomID);
+    var userRef = dbRef.child('room').child(roomName).child('user');
+    var readUser = userRef.once('value', function(data){
+        if (data.numChildren() > 1) {
+            //delete user
+            userRef.child(userRoomID).remove();
+        }else {
+            //delete room
+            userRef.child(userRoomID).remove();
+            dbRef.child('room').child(roomName).remove();
+        }
+        localStorage.removeItem("roomName");
+        localStorage.removeItem("userRoomID");
+    });
+}
+
+function displayRoomProfile(){
+    // window.onload = function(){
+        var roomName = localStorage.getItem("roomName");
+        var roomRef = dbRef.child('room').child(roomName);
+        var readRoom = roomRef.on('value', function(data){
+            var userRef = roomRef.child('user');
+            var readuser = userRef.once('value', function(dataUser){
+                document.getElementById("txtRoomName").innerHTML = data.val().nameRoom;
+                document.getElementById("txtRoomCapacity").innerHTML = "Online : " + dataUser.numChildren() + " of " + data.val().capacityRoom;
+            });
+        });
+        document.getElementById("usernameDB").innerHTML = localStorage.getItem("username");
+    // }
+}
+
+function searchRoomName(roomName){
+    var storesRef = dbRef.child('room').child(roomName);
+    var readStore = storesRef.once('value', function(dataParent) {
+        if (dataParent.numChildren() != 0) {
+            var userRef = storesRef.child("user");
+            var getUser = userRef.once('value', function(data){
+                if (parseInt(dataParent.val().capacityRoom) > data.numChildren()) {
+                    var userEmail = localStorage.getItem("email");
+                    var userName = localStorage.getItem("username");
+                    var userId = localStorage.getItem("id");
+                    var newStoreRef = userRef.push();
+                    var key = newStoreRef.key;
+                    newStoreRef.set({
+                        "key ": key,
+                        "userName": userName,
+                        "email": userEmail,
+                    });
+                    if (typeof(Storage) !== "undefined") {
+                        console.log(roomName);
+                        localStorage.setItem("roomName", roomName);
+                        localStorage.setItem("userRoomID", key);
+                    } else {
+                        alert('Sorry, your browser does not support Web Storage...')
+                    }
+                    setDisplay(getRoomId(parseInt(dataParent.val().capacityRoom)), parseInt(dataParent.val().capacityRoom), roomName);
+                }else {
+                    alert('Room is full.')
+                }
+            });
+        }else {
+            alert('Room not found.')
+        }
+    });
+}
+
+function getRoomId(size){
+    return "#room" + size;
+}
+
+function checkRoom(id, size, name){
+    var nameRoom = name;
+    var storesRef = dbRef.child('room');
+    var readStore = storesRef.once('value', function(data) {
+        // updateStarCount(postElement, snapshot.val());
+        var bol = true;
+        data.forEach(function(child) {
+            var user = child.val();
+            if (user.nameRoom == nameRoom) {
+                bol = false;
+            }
+        });
+        if (bol) {
+            var userEmail = localStorage.getItem("email");
+            var userName = localStorage.getItem("username");
+            var userId = localStorage.getItem("id");
+            console.log(userEmail);
+            console.log(userName);
+            console.log(nameRoom);
+            var rootRoom = storesRef.child(nameRoom);
+            rootRoom.set({
+                "nameRoom" : nameRoom,
+                "capacityRoom" : size,
+                "user" : null,
+            });
+            var userEmail = localStorage.getItem("email");
+            var userName = localStorage.getItem("username");
+            var userId = localStorage.getItem("id");
+            var newStoreRef = storesRef.child(nameRoom).child("user").push();
+            var key = newStoreRef.key;
+            newStoreRef.set({
+                "key ": key,
+                "userName": userName,
+                "email": userEmail,
+            });
+            if (typeof(Storage) !== "undefined") {
+                localStorage.setItem("roomName", nameRoom);
+                localStorage.setItem("userRoomID", key);
+            } else {
+                alert('Sorry, your browser does not support Web Storage...')
+            }
+            setDisplay(id, parseInt(size), name);
+            alert('Create Room is Successfully.')
+        }else {
+          alert('Room is already exits.')
+        }
+    });
+}
+
 function setDisplay(id, size, name){
-    console.log("doing");
+    console.log(id);
+    displayRoomProfile();
     $(id).modal('show');
 
     if (!location.hash) {
@@ -116,7 +253,7 @@ function setDisplay(id, size, name){
         if (error) {
           return console.error(error);
         }
-        room = drone.subscribe(roomId);
+          room = drone.subscribe(roomId);
         room.on('open', error => {
           if (error) {
             onError(error);
@@ -127,7 +264,8 @@ function setDisplay(id, size, name){
         room.on('members', members => {
           console.log('MEMBERS', members);
           // If we are the second user to connect to the room we will be creating the offer
-          const isOfferer = members.length === parseInt(size);
+          // const isOfferer = members.length === parseInt(size);
+          const isOfferer = members.length >= 2;
           console.log(members.length + " | " + parseInt(size));
           startWebRTC(isOfferer);
         });
@@ -212,6 +350,22 @@ function localDescCreated(desc) {
   pc.setLocalDescription(
     desc,
     () => sendMessage({'sdp': pc.localDescription}),
+    onError
+  );
+}
+
+function localDescCreated2(desc) {
+  pc2.setLocalDescription(
+    desc,
+    () => sendMessage({'sdp': pc2.localDescription}),
+    onError
+  );
+}
+
+function localDescCreated3(desc) {
+  pc3.setLocalDescription(
+    desc,
+    () => sendMessage({'sdp': pc3.localDescription}),
     onError
   );
 }

@@ -64,8 +64,8 @@
             </div>
             <div id="room2" class="room modal fade container-fluid" style="height:100%; background:grey;padding:0px;">
               <div class="row text-center">
-                <h2>Room name : </h1>
-                <h3>Member : </h1>
+                <h2 id="txtRoomName">Room name</h1>
+                <h3 id="txtRoomCapacity">Online : 0 of 0</h1>
               </div>
               <div class="row content">
                 <div class="col-sm-6">
@@ -78,21 +78,6 @@
               <div class="row content">
                 <button id="btnCall" onclick="rejectCall()" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-facetime-video" aria-hidden="true"></span> Reject Call</button>
               </div>
-            </div>
-            <div id="room3" class="room modal fade col-sm-12" style="height:780px; background:blue;padding:0px;">
-                <video class="col-sm-6" style="background:red;height:780px;height:100%;"></video>
-                <div class="col-sm-6" style="background:pink;height:780px;padding:0px;height:100%;">
-                    <video class="col-sm-12" style="background:yellow;height:390px;"></video>
-                    <video class="col-sm-12" style="background:green;height:390px;"></video>
-                </div>
-            </div>
-            <div id="room4" class="room modal fade col-sm-12" style="height:780px; background:blue;padding:0px;">
-                <video class="col-sm-6" style="background:red;height:780px;height:100%;"></video>
-                <div class="col-sm-6" style="background:pink;height:780px;padding:0px;height:100%;">
-                    <video class="col-sm-12" style="background:yellow;height:260px;"></video>
-                    <video class="col-sm-12" style="background:green;height:260px;"></video>
-                    <video class="col-sm-12" style="background:black;height:260px;"></video>
-                </div>
             </div>
         </div>
 
@@ -109,13 +94,13 @@
                     <form data-toggle="validator" method="POST">
 
                         <div class="form-group">
-                            <label class="control-label" for="title">Email</label>
-                            <input type="text" name="title" class="form-control" data-error="Please enter title." required />
+                            <label class="control-label" for="title">Room Name</label>
+                            <input type="text" id="roomNameSearch" name="title" class="form-control" data-error="Please enter title." required />
                             <div class="help-block with-errors"></div>
                         </div>
 
                         <div class="form-group">
-                            <button type="submit" class="btn btn-success" onclick="search()">Search</button>
+                            <button type="button" class="btn btn-success" onclick="searchRoom()">Search</button>
                         </div>
 
                     </form>
@@ -144,7 +129,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="control-label" for="title">Room Capacity (Min: 2, Max : 4)</label>
+                            <label class="control-label" for="title">Room Capacity only 2</label>
                             <input type="number" id="roomCapacity" name="roomCapacity" class="form-control" data-error="Please enter title." required />
                             <div class="help-block with-errors"></div>
                         </div>
